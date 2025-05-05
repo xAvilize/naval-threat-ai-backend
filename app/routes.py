@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify
 import json
 import os
+import networkx as nx
 
 api_bp = Blueprint("api", __name__)
 
@@ -10,6 +11,19 @@ def get_threats():
     with open(file_path, "r") as f:
         data = json.load(f)
     return jsonify(data)
+
+@api_bp.route("/api/route")
+def get_route():
+    graph_path = os.path.join(os.path.dirname(__file__), "data", "graph.json")
+    with open(graph_path, "r") as f:
+        graph_data = json.load(f)
+
+    G = nx.Graph()
+    for edge in graph_data["edges"]:
+        G.add_edge(edge[0], edge[1], weight=edge[2])
+
+    path = nx.dijkstra_path(G, graph_data["start"], graph_data["end"])
+    return jsonify({"path": path})
 
 @api_bp.route("/")
 def health():
