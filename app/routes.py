@@ -22,8 +22,11 @@ def get_route():
     for edge in graph_data["edges"]:
         G.add_edge(edge[0], edge[1], weight=edge[2])
 
-    path = nx.dijkstra_path(G, graph_data["start"], graph_data["end"])
-    return jsonify({"path": path})
+    try:
+        path = nx.dijkstra_path(G, graph_data["start"], graph_data["end"])
+        return jsonify({"path": path})
+    except nx.NetworkXNoPath:
+        return jsonify({"error": "No path found"}), 404
 
 @api_bp.route("/")
 def health():
