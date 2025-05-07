@@ -5,14 +5,14 @@ import networkx as nx
 
 api_bp = Blueprint("api", __name__)
 
-@api_bp.route("/api/threats")
+@api_bp.route("/threats")
 def get_threats():
     file_path = os.path.join(os.path.dirname(__file__), "data", "threat_data.json")
     with open(file_path, "r") as f:
         data = json.load(f)
     return jsonify(data)
 
-@api_bp.route("/api/route")
+@api_bp.route("/route")
 def get_route():
     graph_path = os.path.join(os.path.dirname(__file__), "data", "graph.json")
     with open(graph_path, "r") as f:
