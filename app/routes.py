@@ -1,33 +1,39 @@
 from flask import Blueprint, jsonify
 import json
 import os
-import networkx as nx
 
-api_bp = Blueprint("api", __name__)
+bp = Blueprint("api", __name__, url_prefix="/api")
 
-@api_bp.route("/threats")
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+
+@bp.route("/threats")
 def get_threats():
-    file_path = os.path.join(os.path.dirname(__file__), "data", "threat_data.json")
-    with open(file_path, "r") as f:
+    with open(os.path.join(DATA_DIR, 'threat_data.json')) as f:
         data = json.load(f)
     return jsonify(data)
 
-@api_bp.route("/route")
+@bp.route("/route")  # ✅ used by ThreatMap for coordinates
 def get_route():
-    graph_path = os.path.join(os.path.dirname(__file__), "data", "graph.json")
-    with open(graph_path, "r") as f:
-        graph_data = json.load(f)
+    coords = [
+        {"lat": 12.9, "lng": 80.1},
+        {"lat": 13.0, "lng": 80.2},
+        {"lat": 13.1, "lng": 80.3},
+        {"lat": 13.2, "lng": 80.4}
+    ]
+    return jsonify(coords)
 
-    G = nx.Graph()
-    for edge in graph_data["edges"]:
-        G.add_edge(edge[0], edge[1], weight=edge[2])
+@bp.route("/route-nodes")  # 🆕 used by App.tsx for ["A", "B", "C"]
+def get_route_nodes():
+    return jsonify(["A", "B", "C", "D"])
 
-    try:
-        path = nx.dijkstra_path(G, graph_data["start"], graph_data["end"])
-        return jsonify({"path": path})
-    except nx.NetworkXNoPath:
-        return jsonify({"error": "No path found"}), 404
+@bp.route("/predict")
+def predict_threat_level():
+    prediction = {
+        "prediction": "High Threat",
+        "confidence": 0.92
+    }
+    return jsonify(prediction)
 
-@api_bp.route("/")
+@bp.route("/")
 def health():
     return "Backend is alive."
